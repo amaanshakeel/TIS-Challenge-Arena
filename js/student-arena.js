@@ -27,10 +27,11 @@ export function studentArena(root,service,{onQuestion,onChanged,onAccessDenied})
         if(level.state==='locked'){card.append(element('p',`Complete level ${level.id-1} to unlock this challenge.`,'small muted'));}
         else if(level.state==='expired'){card.append(element('p','Your timed attempt has ended. Subsequent levels remain locked.','small muted'));}
         else if(level.kind==='questions'){
-          card.append(element('p','Solve every question in this phase to unlock the next level.','small muted'));
+          const limited=level.questions.some(question=>question.attempt_limit===2);
+          card.append(element('p',limited?'Each question allows two attempts. The next level unlocks when all questions are solved or closed after two incorrect answers.':'Solve every question in this phase to unlock the next level.','small muted'));
           for(const question of level.questions){
-            const row=element('div',undefined,'arena-question');row.append(element('span',`${question.solved?'✓ ':''}${question.title} · ${question.points} points`));
-            const button=element('button',question.solved?'Solved':question.available?'Answer':'Unavailable','button button-secondary button-small');button.type='button';button.disabled=question.solved||!question.available;
+            const row=element('div',undefined,'arena-question');row.append(element('span',`${question.solved?'✓ ':''}${question.title} · ${question.exhausted?'0 points · Two incorrect answers':`${question.points} points`}${question.attempt_limit===2&&!question.solved&&!question.exhausted?` · ${question.attempts_remaining} of 2 attempts remaining`:''}`));
+            const button=element('button',question.exhausted?'Question closed':question.solved?'Solved':question.available?'Answer':'Unavailable','button button-secondary button-small');button.type='button';button.disabled=question.solved||question.exhausted||!question.available;
             button.setAttribute('aria-label',`Open ${question.title}`);button.addEventListener('click',()=>onQuestion(question));row.append(button);card.append(row);
           }
           if(!level.questions.length)card.append(element('p','The organizer needs to add questions to this phase.','small muted'));
@@ -43,7 +44,7 @@ export function studentArena(root,service,{onQuestion,onChanged,onAccessDenied})
         }
         cards.append(card);
       }
-      if(data.levels.length&&data.levels.every(level=>level.state==='completed'))errorNotice(feedback,'You completed every level. Congratulations! Your points are on the leaderboard.','success');
+      if(data.levels.length&&data.levels.every(level=>level.state==='completed'))errorNotice(feedback,'You finished all five levels. Your earned points are on the leaderboard.','success');
     }catch(error){if(request===generation){strip.replaceChildren();cards.replaceChildren();errorNotice(feedback,arenaError(error),['PGRST202','42883'].includes(error.code)?'info':'error');}onAccessDenied(error);}
     finally{if(request===generation)refresh.disabled=false;}
   }

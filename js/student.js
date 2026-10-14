@@ -18,7 +18,7 @@ async function overview(){const request=++overviewGeneration;const feedback=docu
   finally{if(request===overviewGeneration)document.getElementById('progress-loading').hidden=true;}
 }
 const board=leaderboardSection(document.getElementById('student-leaderboard'),service.leaderboard,{onError:accessDenied});
-const puzzles=studentPuzzles(document.getElementById('student-puzzles'),service,{onChanged(){overview();board.load();arena.load();},onAccessDenied:accessDenied});
+const puzzles=studentPuzzles(document.getElementById('student-puzzles'),service,{onChanged(change){arena.load();if(!change?.attemptsOnly){overview();board.load();}},onAccessDenied:accessDenied});
 const arena=studentArena(document.getElementById('student-arena'),createArenaService({rpc:async(...args)=>(await getClient()).rpc(...args)}),{onQuestion:puzzles.open,onChanged(){overview();board.load();},onAccessDenied:accessDenied});
 const sections={puzzles:{load(){puzzles.load();arena.load();}},profile:{load(){}},leaderboard:board};
 function navigate(name){if(!sections[name])name='puzzles';active=name;

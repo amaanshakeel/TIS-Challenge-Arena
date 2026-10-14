@@ -25,7 +25,7 @@ try{
     create table auth.users(id uuid primary key,email text,raw_user_meta_data jsonb default '{}'::jsonb);
     create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
     grant usage on schema auth to anon,authenticated;grant execute on function auth.uid() to anon,authenticated;`);
-  for(const file of ['schema.sql','part2.sql','part3.sql','visual-puzzles.sql'])await owner.query(await readFile(`supabase/${file}`,'utf8'));
+  for(const file of ['schema.sql','part2.sql','part3.sql','visual-puzzles.sql','question-attempt-limit.sql'])await owner.query(await readFile(`supabase/${file}`,'utf8'));
   const a='60000000-0000-0000-0000-000000000001',b='60000000-0000-0000-0000-000000000002',admin='60000000-0000-0000-0000-000000000003';
   for(const [id,reg] of [[a,'A'],[b,'B'],[admin,'ADMIN']])await owner.query('insert into auth.users(id,email,raw_user_meta_data) values($1,$2,$3)',[id,`${reg}@example.test`,JSON.stringify({full_name:`User ${reg}`,registration_number:reg,department:'Computing',semester:2})]);
   await owner.query("update public.profiles set status='approved'");await owner.query("update public.profiles set role='admin' where id=$1",[admin]);
@@ -97,7 +97,18 @@ try{
   const late=move(first,0,0,robot.revision,3);await blocked(1,'arena_move');await new Promise(resolve=>setTimeout(resolve,150));await owner.query('commit');
   assert.equal((await late).rows[0].result.status,'expired');
   console.log('PASS visual deadline is rechecked after waiting for a locked attempt');
-  console.log('9 native PostgreSQL concurrency checks passed on separate connections.');
+  const capped=(await owner.query("insert into public.puzzles(title,description,points,status,created_by) values('Last attempt race','Find the answer',30,'published',$1) returning id",[admin])).rows[0].id;
+  await owner.query("insert into public.puzzle_answers(puzzle_id,correct_answer) values($1,'42')",[capped]);
+  const wrong=client=>client.query('select public.submit_answer($1,$2) as result',[capped,'wrong']);
+  assert.equal((await wrong(first)).rows[0].result.attempts_remaining,1);
+  await owner.query('begin');await owner.query('select id from public.profiles where id=$1 for update',[a]);
+  const wrongTwo=wrong(first),wrongThree=wrong(second);await blocked(2);await owner.query('commit');
+  const cappedResults=await Promise.all([wrongTwo,wrongThree]);assert.ok(cappedResults.every(r=>r.rows[0].result.outcome==='attempts_exhausted'));
+  assert.equal((await owner.query('select count(*)::int n from public.submissions where student_id=$1 and puzzle_id=$2',[a,capped])).rows[0].n,2);
+  assert.equal((await submit(first,capped)).rows[0].result.outcome,'attempts_exhausted');
+  assert.equal((await owner.query('select sum(awarded_points)::int points from public.submissions where student_id=$1 and puzzle_id=$2',[a,capped])).rows[0].points,0);
+  console.log('PASS simultaneous requests for the last answer attempt never create a third attempt or late points');
+  console.log('10 native PostgreSQL concurrency checks passed on separate connections.');
 }finally{
   await Promise.allSettled(clients.map(client=>client.query('rollback').then(()=>client.end())));
   if(server&&server.exitCode===null)await run(binaries.pg_ctl,['-D',directory,'stop','-m','fast','-w']);

@@ -16,6 +16,8 @@ Your existing schema.sql, part2.sql and part3.sql must already be installed. In 
 
 This script preserves existing accounts, standalone questions, submissions and leaderboard scores. It adds private course settings and timed attempts, plus authorized RPC endpoints. It does not open or populate question phases automatically.
 
+Then run **supabase/question-attempt-limit.sql** in a separate new query. This adds the two-attempt rule described in [question-attempts-setup.md](question-attempts-setup.md). If the visual extension is already installed, run only this new update.
+
 ## Publish the application files
 
 Commit and push the updated project files to your existing GitHub repository. The current GitHub Pages workflow deploys the static files as before. Include both files in assets/puzzles/; they are the supplied original images, copied unchanged:
@@ -30,7 +32,7 @@ There is no new production dependency or build step. The Supabase public configu
 1. Sign in with your existing approved admin account.
 2. In **Puzzles**, create the questions you want for the opening and final phases. Enter their correct answers and points, then publish them. Use separate questions for each phase. A question with previous standalone attempts cannot be assigned to this new course.
 3. Open **Competition levels**, then choose **Refresh settings** if you just created questions. The first visit prepares the visual challenges as drafts.
-4. Select the opening and final question sets. Every selected question must be solved to complete its phase. Avoid future opening times or early closing times unless you intend participants to wait for those questions.
+4. Select the opening and final question sets. Every selected question must be solved or closed after two wrong answers to complete its phase. Failed questions earn zero points. Avoid future opening times or early closing times unless you intend participants to wait for those questions.
 5. Review the defaults: logo 4 × 4 pieces / 180 seconds / 100 points; robot 4 × 6 pieces / 300 seconds / 150 points; maze 180 seconds / 150 points. Increasing the jigsaw grid increases difficulty. All timers support 30–1,800 seconds. Add challenge instructions and optional opening/closing times in your local time zone.
 6. Preview both pictures and the maze. The maze has dead ends, loops, a shorter route and longer routes. You can generate a different maze or edit its layout. Preview does not create student attempts or award points.
 7. Select **Open the five-level competition** and choose **Save competition settings**.

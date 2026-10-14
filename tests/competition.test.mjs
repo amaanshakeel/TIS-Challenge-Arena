@@ -9,10 +9,13 @@ test('submission feedback covers correct/incorrect/repeated/unavailable/rate-lim
   const {submissionFeedback}=await import('../js/competition-validation.js');
   assert.match(submissionFeedback({outcome:'correct',awarded_points:25}).message,/25/);
   assert.match(submissionFeedback({outcome:'incorrect'}).message,/try again/i);
+  assert.match(submissionFeedback({outcome:'incorrect',attempts_remaining:1}).message,/1 attempt remaining/i);
+  const exhausted=submissionFeedback({outcome:'attempts_exhausted',attempts_remaining:0});assert.equal(exhausted.exhausted,true);assert.match(exhausted.message,/zero points|0 points/i);
   assert.match(submissionFeedback({outcome:'already_solved'}).message,/already solved/i);
   assert.match(submissionFeedback({outcome:'puzzle_unavailable'}).message,/closed|available/i);
   assert.match(submissionFeedback({outcome:'rate_limited',retry_after_seconds:30}).message,/30/);
   assert.doesNotMatch(submissionFeedback({outcome:'unknown',correct_answer:'secret'}).message,/secret/);
+  assert.equal(submissionFeedback({outcome:'unknown'}).uncertain,true);
 });
 test('competition errors explain ineligibility, session expiry and missing setup without raw internals',async()=>{
   const {competitionErrorMessage}=await import('../js/competition-validation.js');

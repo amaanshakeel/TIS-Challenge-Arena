@@ -4,11 +4,12 @@ export function validateAnswer(input) {
 }
 export function submissionFeedback(result) {
   const outcomes={correct:{message:`Correct! You earned ${Number(result.awarded_points)} points.`,tone:'success',solved:true},
-    incorrect:{message:'That answer is not correct. Take another look and try again.',tone:'warning'},
+    incorrect:{message:Number.isInteger(result.attempts_remaining)?`That answer is not correct. ${result.attempts_remaining} ${result.attempts_remaining===1?'attempt remaining':'attempts remaining'}. Read carefully and try again.`:'That answer is not correct. Take another look and try again.',tone:'warning'},
+    attempts_exhausted:{message:'Two incorrect answers. This question is now closed with 0 points and cannot be reopened.',tone:'warning',exhausted:true},
     already_solved:{message:'You have already solved this puzzle. Your points have been counted once.',tone:'success',solved:true},
     puzzle_unavailable:{message:'This puzzle is closed or no longer available for submissions. Refresh the puzzle list.',tone:'warning',unavailable:true},
     rate_limited:{message:`Please wait ${Math.max(1,Number(result.retry_after_seconds)||60)} seconds before trying again.`,tone:'warning'}};
-  return outcomes[result?.outcome]??{message:'We could not confirm your submission. Refresh your progress before trying again.',tone:'error'};
+  return Object.hasOwn(outcomes,result?.outcome)?outcomes[result.outcome]:{message:'We could not confirm your submission. Refresh your progress before trying again.',tone:'error',uncertain:true};
 }
 export function competitionErrorMessage(error) {
   const messages={authentication_required:'Your session has expired. Please sign in again.',

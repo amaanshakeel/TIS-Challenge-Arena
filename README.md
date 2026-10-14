@@ -23,7 +23,7 @@ No sample participants, invented scores, custom passwords, or mock backend trans
 
 The optional course adds opening questions, the supplied society-logo jigsaw, the supplied robot-image jigsaw, a timed branching maze, and final questions. Levels unlock in order, with a yellow/green/red progress strip. Timed boards resume their server-owned deadlines after refresh, and visual completion uses the existing leaderboard.
 
-Run the new `supabase/visual-puzzles.sql` extension after the first three SQL files, then configure **Competition levels** in the Admin Dashboard. The course starts closed and needs real question sets selected by the organizer. Follow [the installation guide](docs/visual-puzzles-setup.md) before opening it to participants.
+Run `supabase/visual-puzzles.sql` after the first three SQL files, then `supabase/question-attempt-limit.sql`. Configure **Competition levels** in the Admin Dashboard. Questions allow two attempts; two incorrect answers close the question at zero points. A phase finishes when every assigned question is solved or closed. The course starts closed and needs real question sets selected by the organizer. Follow [the installation guide](docs/visual-puzzles-setup.md) and [two-attempt update instructions](docs/question-attempts-setup.md) before opening it to participants.
 
 ## Technology and files
 

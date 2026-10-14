@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {resolve,sep,extname} from 'node:path';
 import {randomUUID} from 'node:crypto';
 
-export async function competitionHarness({visual=false}={}) {
+export async function competitionHarness({visual=false,attemptLimit=false}={}) {
   const db=new PGlite();
   await db.exec(`create role anon nologin;create role authenticated nologin;create schema auth;
     create table auth.users(id uuid primary key,email text unique,raw_user_meta_data jsonb default '{}'::jsonb);
@@ -12,11 +12,13 @@ export async function competitionHarness({visual=false}={}) {
     grant usage on schema auth to anon,authenticated;grant execute on function auth.uid() to anon,authenticated;`);
   for(const file of ['schema.sql','part2.sql','part3.sql'])await db.exec(await readFile(`supabase/${file}`,'utf8'));
   if(visual)await db.exec(await readFile('supabase/visual-puzzles.sql','utf8'));
+  if(attemptLimit)await db.exec(await readFile('supabase/question-attempt-limit.sql','utf8'));
   const admin='70000000-0000-0000-0000-000000000001';
   await db.query('insert into auth.users(id,email,raw_user_meta_data) values($1,$2,$3)',[admin,'admin@example.test',JSON.stringify({full_name:'TIS Administrator',registration_number:'ADMIN-01',department:'Computing',semester:2})]);
   await db.query("update public.profiles set role='admin',status='approved' where id=$1",[admin]);
   const fields={admin_overview:[],admin_participants:['p_search','p_status','p_sort','p_page','p_page_size'],admin_change_status:['p_student_id','p_action','p_expected_status'],admin_puzzles:['p_search','p_status','p_page','p_page_size'],admin_puzzle:['p_puzzle_id'],admin_save_puzzle:['p_puzzle_id','p_title','p_description','p_answer','p_points','p_difficulty','p_status','p_opens_at','p_closes_at','p_case_sensitive','p_expected_updated_at'],admin_set_puzzle_status:['p_puzzle_id','p_status','p_expected_updated_at'],submit_answer:['p_puzzle_id','p_answer'],student_overview:[],student_puzzles:['p_page','p_page_size'],public_leaderboard:['p_page','p_page_size'],admin_rankings:['p_page','p_page_size']};
   Object.assign(fields,{admin_arena:[],admin_save_arena:['p_config','p_expected_updated_at'],arena_progress:[],arena_start:['p_level'],arena_move:['p_level','p_move','p_revision']});
+  fields.question_status=['p_puzzle_id'];
   let queue=Promise.resolve();
   function owner(callback){const task=queue.then(callback);queue=task.catch(()=>{});return task;}
   function asUser(id,callback){return owner(async()=>{await db.exec(`set role ${id?'authenticated':'anon'}`);try{await db.query("select set_config('request.jwt.claim.sub',$1,false)",[id??'']);return await callback();}finally{await db.exec('reset role');}});}
