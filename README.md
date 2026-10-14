@@ -2,7 +2,7 @@
 
 **Tech and Innovative Society (TIS)** · **Think. Solve. Rise.**
 
-A campus puzzle competition: students register, visit the TIS stall for verification, wait for approval, and then solve challenges for points. **All three parts are implemented and locally tested.** Your public Supabase configuration is installed, and you report the foundation and Part 2 SQL successfully applied. **Part 3 SQL installation, live authenticated acceptance tests, and GitHub Pages deployment remain pending.** The site has not been published by this agent.
+A campus puzzle competition: students register, visit the TIS stall for verification, wait for approval, and then solve challenges for points. **All three original parts are implemented and locally tested, and the organizer reports the deployed application is working.** The new five-level visual competition is implemented locally; its SQL extension, updated GitHub Pages files and organizer-selected question sets must be installed before it opens to participants.
 
 ## What is included
 
@@ -18,6 +18,12 @@ A campus puzzle competition: students register, visit the TIS stall for verifica
 - Local authentication/permission tests, complete UI-to-SQL browser tests, and native PostgreSQL multi-connection race tests.
 
 No sample participants, invented scores, custom passwords, or mock backend transport are included in production. Test records and Auth transports are isolated to `tests/` and disposable local databases.
+
+## Five-level visual competition
+
+The optional course adds opening questions, the supplied society-logo jigsaw, the supplied robot-image jigsaw, a timed branching maze, and final questions. Levels unlock in order, with a yellow/green/red progress strip. Timed boards resume their server-owned deadlines after refresh, and visual completion uses the existing leaderboard.
+
+Run the new `supabase/visual-puzzles.sql` extension after the first three SQL files, then configure **Competition levels** in the Admin Dashboard. The course starts closed and needs real question sets selected by the organizer. Follow [the installation guide](docs/visual-puzzles-setup.md) before opening it to participants.
 
 ## Technology and files
 

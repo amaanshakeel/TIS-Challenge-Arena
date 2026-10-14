@@ -39,7 +39,9 @@ export function adminErrorMessage(error) {
     record_not_found:'This record is no longer available. Refresh the list.',
     invalid_input:'Check the entered fields and dates, then try again.',
     scoring_locked:'Answers, case sensitivity, and points are locked because this puzzle has recorded attempts.',
-    answer_required:'Add a valid correct answer before publishing this puzzle.'};
+    answer_required:'Add a valid correct answer before publishing this puzzle.',
+    course_locked:'This question belongs to a competition that has started. Its answer and points are locked.',
+    visual_challenge_required:'Edit visual challenge settings in Competition levels.'};
   if(messages[error?.message])return messages[error.message];
   if(['PGRST301','PGRST303','bad_jwt','session_not_found'].includes(error?.code)||error?.status===401)return 'Your session has expired. Please sign in again.';
   if(['PGRST202','PGRST205','42883'].includes(error?.code))return 'The dashboard database setup is incomplete. Ask the project owner to run the Part 2 SQL after the foundation SQL.';

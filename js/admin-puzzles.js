@@ -24,7 +24,7 @@ export function puzzleSection(root,service,{onChanged,onAccessDenied}) {
         tr.append(element('td',String(puzzle.attempts)),element('td',String(puzzle.successful_solves)));
         const actions=element('td'),buttons=element('div',undefined,'table-actions');
         const edit=element('button','Edit','table-button');edit.type='button';edit.setAttribute('aria-label',`Edit ${puzzle.title}`);edit.addEventListener('click',()=>openEditor(puzzle.id));buttons.append(edit);
-        for(const target of (puzzle.status==='published'?['closed','draft']:['published'])) {
+        for(const target of ([2,3,4].includes(puzzle.arena_level)?[]:puzzle.status==='published'?['closed','draft']:['published'])) {
           const label={published:'Publish',closed:'Close',draft:'Unpublish'}[target];
           const button=element('button',label,'table-button');button.type='button';button.setAttribute('aria-label',`${label} ${puzzle.title}`);button.addEventListener('click',()=>changeStatus(puzzle,target,button,label));buttons.append(button);
         }
@@ -41,6 +41,7 @@ export function puzzleSection(root,service,{onChanged,onAccessDenied}) {
     try {
       const detail=id?await service.puzzle(id):null;
       if(request!==editorGeneration||document.getElementById('protected-content').hidden)return;
+      if([2,3,4].includes(detail?.arena_level)){document.querySelector('[data-section-link=levels]').click();return;}
       original=detail;form.reset();fieldErrors({});errorNotice(editorNotice,'');
       dialog.querySelector('h2').textContent=original?'Edit puzzle':'Create puzzle';
       for(const field of ['title','description','correct_answer','points','difficulty','status','opens_at','closes_at']) {

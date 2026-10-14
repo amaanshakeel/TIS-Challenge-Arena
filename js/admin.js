@@ -6,6 +6,8 @@ import {puzzleSection} from './admin-puzzles.js';
 import {adminErrorMessage} from './admin-validation.js';
 import {errorNotice} from './admin-ui.js';
 import {adminRankings} from './admin-rankings.js';
+import {createArenaService} from './arena-service.js';
+import {adminArena} from './admin-arena.js';
 
 const service=createAdminService({rpc:async(...args)=>(await getClient()).rpc(...args)});
 let active='overview',overviewRequest=0;
@@ -33,6 +35,7 @@ sections.registrations=participantSection(document.getElementById('section-regis
 sections.participants=participantSection(document.getElementById('section-participants'),service,{onChanged:changed,onAccessDenied:accessDenied});
 sections.puzzles=puzzleSection(document.getElementById('section-puzzles'),service,{onChanged:changed,onAccessDenied:accessDenied});
 sections.rankings=adminRankings(document.getElementById('section-rankings'),accessDenied);
+sections.levels=adminArena(document.getElementById('section-levels'),createArenaService({rpc:async(...args)=>(await getClient()).rpc(...args)}),{onChanged:changed,onAccessDenied:accessDenied});
 
 function navigate(name) {
   if(!sections[name])name='overview';active=name;

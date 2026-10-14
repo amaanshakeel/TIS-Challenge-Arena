@@ -55,5 +55,5 @@ export function studentPuzzles(root,service,{onChanged,onAccessDenied}) {
   dialog.querySelector('[data-close-solve]').addEventListener('click',()=>{if(!submitting)dialog.close();});
   dialog.addEventListener('close',()=>{current=null;form.reset();});
   refresh.addEventListener('click',load);
-  return {load,invalidate};
+  return {load,invalidate,open};
 }
