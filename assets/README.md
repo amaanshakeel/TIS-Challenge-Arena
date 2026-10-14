@@ -1,6 +1,5 @@
 # Official logo
 
-Place the official society logo at **assets/logo.png**, keeping this exact lowercase name.
-No substitute logo is included. The header shows a clean TIS text fallback until the file exists.
-Use a transparent PNG if available. CSS `--logo-size` controls its box; `object-fit: contain`
-preserves aspect ratio. Adjust `.brand` gap and `.brand-mark` padding in `css/style.css`.
+The supplied society logo is stored unchanged at **assets/puzzles/tis-logo.jpeg**.
+The site header and browser tab icon use this same image. The header retains a TIS text fallback if the image cannot load.
+CSS `--logo-size` controls its box; `object-fit: contain` preserves its aspect ratio.

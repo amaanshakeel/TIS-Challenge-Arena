@@ -213,7 +213,7 @@ Check the existing remote and branch before pushing. For branch-based Pages inst
 
 ## 8. Add the official logo
 
-Place your supplied logo at **`assets/logo.png`** (exact lowercase path). Do not create a generated substitute. The current header displays a clean TIS text fallback when the file is missing. `--logo-size` and `.brand-mark` in `css/style.css` control dimensions/padding; `object-fit: contain` preserves aspect ratio.
+Your supplied society logo is installed at **`assets/puzzles/tis-logo.jpeg`** and is used in the site header and as the browser tab icon on every page. The header retains a TIS text fallback if the image cannot load. `--logo-size` and `.brand-mark` in `css/style.css` control dimensions; `object-fit: contain` preserves aspect ratio.
 
 ## Troubleshooting
 
@@ -231,6 +231,6 @@ Place your supplied logo at **`assets/logo.png`** (exact lowercase path). Do not
 - **Too many attempts:** wait for the interval reported by the server, then retry. Switching devices does not reset the trusted student limit.
 - **Record changed since opening:** another operation changed it. Refresh/reopen it; an old save must not overwrite newer data.
 - **Auth user deletion fails:** historical records intentionally prevent deletion. Use participant termination/restoration to manage access.
-- **Logo request returns 404:** expected until you supply `assets/logo.png`; the layout uses its text fallback.
+- **Logo request returns 404:** include `assets/puzzles/tis-logo.jpeg` in your GitHub push. The header uses its text fallback if the asset is missing.
 
 Official references: [Auth signup](https://supabase.com/docs/reference/javascript/auth-signup), [managing user data and triggers](https://supabase.com/docs/guides/auth/managing-user-data), [RLS](https://supabase.com/docs/guides/database/postgres/row-level-security), [production and email readiness](https://supabase.com/docs/guides/deployment/going-into-prod).

@@ -6,7 +6,11 @@ export function jigsawGame(root,{settings,onMove,aspect=1}) {
   const layout=element('div',undefined,'jigsaw-layout'),board=element('div',undefined,'jigsaw-board'),tray=element('div',undefined,'jigsaw-tray');
   board.style.setProperty('--columns',cols);board.style.aspectRatio=String(aspect);board.setAttribute('aria-label','Jigsaw board');
   tray.style.setProperty('--columns',cols);tray.style.setProperty('--tile-ratio',String(aspect*rows/cols));tray.setAttribute('aria-label','Shuffled pieces');
-  const trayBox=element('div',undefined,'jigsaw-tray-box');trayBox.append(element('h3','Shuffled pieces'),tray);
+  const reference=element('figure',undefined,'jigsaw-reference'),referenceImage=element('img');
+  referenceImage.src=image;referenceImage.alt='Complete picture to match for this jigsaw';referenceImage.decoding='async';
+  const caption=element('figcaption','Reference picture'),fullSize=element('a','Open full-size reference','small');
+  fullSize.href=image;fullSize.target='_blank';fullSize.rel='noopener noreferrer';reference.append(caption,referenceImage,fullSize);
+  const trayBox=element('div',undefined,'jigsaw-tray-box');trayBox.append(reference,element('h3','Shuffled pieces'),tray);
   layout.append(board,trayBox);root.replaceChildren(instruction,layout);
   let selected=null,state=null,disabled=false,focusKey=null;
   function paint(node,piece) {

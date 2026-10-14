@@ -8,3 +8,5 @@
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
 .leaderboard-toolbar{display:flex;justify-content:space-between;align-items:center;gap:18px;margin:24px 0 16px}.leaderboard-toolbar p{margin-bottom:0}.pagination{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;margin:20px 0}.table-message{text-align:center;padding:30px;color:var(--muted)}.leaderboard-preview td:nth-child(2){overflow-wrap:anywhere;max-width:400px}.leaderboard-preview th,.leaderboard-preview td{font-size:.83rem}.leaderboard-preview th{font-size:.72rem}
 @media(max-width:420px){.leaderboard-preview th,.leaderboard-preview td{padding:12px 10px;font-size:.73rem}.leaderboard-toolbar{align-items:start;flex-direction:column}}
+
+.brand-mark.brand-mark-logo{border:0;border-radius:50%;padding:0;background:white;overflow:hidden}

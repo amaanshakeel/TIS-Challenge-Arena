@@ -15,8 +15,8 @@ function brand() {
   const node=link('', 'index.html','brand');
   node.setAttribute('aria-label','TIS Challenge Arena home');
   const mark=element('span','TIS','brand-mark');
-  const img=element('img'); img.src='assets/logo.png'; img.alt=''; img.hidden=true;
-  img.addEventListener('load',()=>{img.hidden=false;mark.replaceChildren(img);});
+  const img=element('img'); img.src='assets/puzzles/tis-logo.jpeg'; img.alt=''; img.hidden=true;
+  img.addEventListener('load',()=>{img.hidden=false;mark.replaceChildren(img);mark.classList.add('brand-mark-logo');});
   img.addEventListener('error',()=>img.remove(),{once:true});
   mark.append(img);
   const name=element('span',undefined,'brand-name');

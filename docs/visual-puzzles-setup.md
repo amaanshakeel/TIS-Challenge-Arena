@@ -45,6 +45,8 @@ Existing standalone puzzles stay separate. A level question can still be edited 
 
 For jigsaws, drag a piece onto a board cell, or select the piece and then select its destination. Keyboard users can Tab to a piece, select it with Enter or Space, then Tab to the destination and select it. Occupied cells exchange pieces. Partial placements do not reveal whether they are correct.
 
+Each jigsaw shows its complete reference picture beside the board and shuffled pieces. Use **Open full-size reference** to view the original image in another tab; the original attempt timer continues running.
+
 For the maze, use arrow keys while focused on the maze or its direction controls, or tap the on-screen buttons. Move through open corridors from the top entrance to the bottom exit. Any legal route completed before the deadline succeeds; a shorter route helps save time.
 
 Opening challenge instructions does not start the timer. **Start timed attempt** starts or resumes the student's single attempt. The remaining time and moves are saved by Supabase. Closing the dialog, switching tabs, reloading or changing the device clock does not reset the deadline. An expired timed level awards no completion points and leaves later levels locked; there is no participant restart.
