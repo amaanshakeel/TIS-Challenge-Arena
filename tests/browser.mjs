@@ -88,7 +88,7 @@ try {
         getSession:async()=>({data:{session:result().session?{}:null},error:null}),
         getUser:async()=>({data:{user:result().session?{id:'u'}:null},error:null}),
         signInWithPassword:async()=>{const v=result();v.session=true;sessionStorage.setItem('fixture',JSON.stringify(v));return {data:{session:{}},error:null};},
-        signUp:async(args)=>{sessionStorage.setItem('signup',JSON.stringify(args));const v=result();if(v.signupError)return {data:null,error:v.signupError};return {data:{user:{id:'u',identities:v.obfuscated?[]:[{}]},session:null},error:null};},
+        signUp:async(args)=>{sessionStorage.setItem('signup',JSON.stringify(args));const v=result();if(v.signupError)return {data:null,error:v.signupError};if(v.autoConfirm){v.session=true;sessionStorage.setItem('fixture',JSON.stringify(v));}return {data:{user:{id:'u',identities:v.obfuscated?[]:[{}]},session:v.autoConfirm?{}:null},error:null};},
         signOut:async()=>{const v=result();v.session=false;sessionStorage.setItem('fixture',JSON.stringify(v));return {error:null};},
         onAuthStateChange:()=>({data:{subscription:{unsubscribe(){}}}})
       },from:()=>({select:()=>({eq:()=>({maybeSingle:async()=>({data:result().profile||null,error:null})})})})};
@@ -142,6 +142,8 @@ try {
   assert.equal(signup.options.emailRedirectTo,base+'account.html');
   assert.equal(signup.options.data.role,undefined);
   checked('registration success and email-confirmation redirect retain repository subpath');
+  await fp.evaluate(p=>sessionStorage.setItem('fixture',JSON.stringify({session:false,autoConfirm:true,profile:p})),student);
+  await fp.goto(base+'register.html');await fillRegistration();await fp.getByRole('button',{name:'Create account',exact:true}).click();await fp.waitForURL('**/account.html?registered=1');await fp.getByRole('heading',{name:'Verification pending'}).waitFor();checked('signup with email confirmation disabled still requires admin approval');
   await fp.evaluate(()=>sessionStorage.setItem('fixture',JSON.stringify({session:false,obfuscated:true})));
   await fp.goto(base+'register.html');await fillRegistration();
   await fp.getByRole('button',{name:'Create account',exact:true}).click();

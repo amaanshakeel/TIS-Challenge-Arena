@@ -25,7 +25,7 @@ export function authErrorMessage(error, context = 'general') {
     email_exists: 'An account may already use this email. Please sign in or check your confirmation email.',
     weak_password: 'Choose a stronger password of at least 12 characters.',
     over_request_rate_limit: 'Too many requests. Please wait a moment before trying again.',
-    over_email_send_rate_limit: 'Please wait before requesting another email.',
+    over_email_send_rate_limit: 'The registration email service has reached its sending limit. This limit is shared across the competition, even on your first attempt. Please contact the TIS team.',
     signup_disabled: 'Registration is temporarily unavailable. Please visit the TIS stall.',
     validation_failed: 'Check your information and try again.',
     session_not_found: 'Your session has expired. Please sign in again.',

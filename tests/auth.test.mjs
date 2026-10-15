@@ -62,5 +62,7 @@ test('expected auth errors become safe messages', async () => {
   assert.match(authErrorMessage({code:'email_not_confirmed'}), /confirm/i);
   assert.match(authErrorMessage({code:'user_already_exists'}), /sign in/i);
   assert.match(authErrorMessage({code:'over_request_rate_limit'}), /wait/i);
+  assert.match(authErrorMessage({code:'over_email_send_rate_limit'}), /registration email service|email service/i);
+  assert.doesNotMatch(authErrorMessage({code:'over_email_send_rate_limit'}), /requesting another email/i);
   assert.doesNotMatch(authErrorMessage({message:'secret SQL table profiles stack trace'}), /secret|SQL|stack/);
 });
