@@ -25,14 +25,14 @@ export function timedGame(service,{onChanged,onAccessDenied}) {
     if(attempt.status==='active'&&seconds===0){game?.render(attempt.state,true);if(!working&&!recovery&&!expiredRequested){expiredRequested=true;restore();}}
   }
   function apply(result){
-    attempt=result;recovery=false;expiredRequested=false;start.hidden=true;refresh.hidden=false;
+    attempt=result;recovery=false;expiredRequested=false;start.hidden=true;refresh.hidden=result.status!=='active';
     // server_time is captured at response creation, after processing the request.
     // Anchor at receipt; the server still decides whether a late move can score.
     baseMs=Math.max(0,Date.parse(result.expires_at)-Date.parse(result.server_time));baseAt=performance.now();
     if(!game)game=result.kind==='maze'?mazeGame(surface,{settings:result.settings,onMove:move}):jigsawGame(surface,{settings:result.settings,onMove:move,aspect});
     game.render(result.state,result.status!=='active');clock();
     if(result.status==='completed'){stop();errorNotice(feedback,`Level completed! ${result.awarded_points} points earned. The next level is now unlocked.`,'success');onChanged();}
-    else if(result.status==='expired'){stop();errorNotice(feedback,'Time is up. This attempt has ended; later levels stay locked.','warning');onChanged();}
+    else if(result.status==='expired'){stop();errorNotice(feedback,'Time is up. This attempt finished with 0 points. Continue to the next level.','warning');onChanged();}
     else if(result.outcome==='stale_move')errorNotice(feedback,'Your board changed in another tab. The latest saved state is restored.','warning');
     else if(interval===null)interval=setInterval(clock,250);
   }
@@ -44,12 +44,12 @@ export function timedGame(service,{onChanged,onAccessDenied}) {
     catch(error){if(requestId!==generation)return;recovery=true;errorNotice(feedback,`${arenaError(error)} Use “Restore saved state” before continuing.`);if(attempt)game?.render(attempt.state,true);onAccessDenied(error);}
     finally{if(requestId===generation){working=false;start.disabled=false;refresh.disabled=false;if(attempt&&!recovery)game?.render(attempt.state,attempt.status!=='active'||remainingSeconds(baseMs,baseAt,performance.now())===0);}}
   }
-  async function restore(){return request(()=>service.start(level.id));}
+  async function restore(){if(attempt&&attempt.status!=='active')return;return request(()=>service.start(level.id));}
   async function move(value){if(!attempt||attempt.status!=='active'||recovery||remainingSeconds(baseMs,baseAt,performance.now())===0)return;return request(()=>service.move(level.id,value,attempt.revision));}
   start.addEventListener('click',restore);refresh.addEventListener('click',restore);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&dialog.open&&attempt&&!working)restore();});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&dialog.open&&attempt?.status==='active'&&!working)restore();});
   async function open(selected){
-    if(dialog.open||document.getElementById('protected-content').hidden)return;
+    if(dialog.open||['completed','expired'].includes(selected.state)||document.getElementById('protected-content').hidden)return;
     generation++;level=selected;attempt=null;working=false;recovery=false;aspect=1;errorNotice(feedback,'');start.hidden=false;start.disabled=true;refresh.hidden=true;
     title.textContent=selected.title;eyebrow.textContent=`Level ${selected.id} · ${selected.points} points`;timer.textContent=`${Math.floor(selected.settings.seconds/60)} minutes ${selected.settings.seconds%60?selected.settings.seconds%60+' seconds':''}`;
     surface.replaceChildren(element('p',selected.description||(selected.kind==='maze'?'Reach the opposite exit before time runs out. Choose corridors carefully: some lead to dead ends, others take longer.':'Assemble all shuffled pieces into the complete picture before time runs out.'),'game-intro'),element('p','One timed attempt. Closing this window or refreshing does not pause the timer. If already started, this button resumes your saved attempt.','small muted'));

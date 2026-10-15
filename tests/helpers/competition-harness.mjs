@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {resolve,sep,extname} from 'node:path';
 import {randomUUID} from 'node:crypto';
 
-export async function competitionHarness({visual=false,attemptLimit=false}={}) {
+export async function competitionHarness({visual=false,attemptLimit=false,timedProgression=false}={}) {
   const db=new PGlite();
   await db.exec(`create role anon nologin;create role authenticated nologin;create schema auth;
     create table auth.users(id uuid primary key,email text unique,raw_user_meta_data jsonb default '{}'::jsonb);
@@ -13,6 +13,7 @@ export async function competitionHarness({visual=false,attemptLimit=false}={}) {
   for(const file of ['schema.sql','part2.sql','part3.sql'])await db.exec(await readFile(`supabase/${file}`,'utf8'));
   if(visual)await db.exec(await readFile('supabase/visual-puzzles.sql','utf8'));
   if(attemptLimit)await db.exec(await readFile('supabase/question-attempt-limit.sql','utf8'));
+  if(timedProgression)await db.exec(await readFile('supabase/timed-level-progression.sql','utf8'));
   const admin='70000000-0000-0000-0000-000000000001';
   await db.query('insert into auth.users(id,email,raw_user_meta_data) values($1,$2,$3)',[admin,'admin@example.test',JSON.stringify({full_name:'TIS Administrator',registration_number:'ADMIN-01',department:'Computing',semester:2})]);
   await db.query("update public.profiles set role='admin',status='approved' where id=$1",[admin]);

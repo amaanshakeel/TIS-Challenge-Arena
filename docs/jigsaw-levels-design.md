@@ -14,7 +14,7 @@ Participants must complete a level to unlock the next. These challenges belong i
 
 ## Proposed participant experience
 
-The student dashboard shows a horizontal progress strip at the top with five numbered levels. The current available or in-progress level is yellow, completed levels are green, and locked levels are red. Each item also has a text label and status icon so color is not the only status signal. On smaller screens, the strip can scroll horizontally without shrinking its labels beyond readability. An expired attempt has an explicit Expired label and leaves later levels locked. Locked levels explain which preceding level must be completed. The first level is available only to approved participants and within its publication schedule.
+The student dashboard shows a horizontal progress strip at the top with five numbered levels. The current available or in-progress level is yellow, completed levels are green, and locked levels are red. Each item also has a text label and status icon so color is not the only status signal. On smaller screens, the strip can scroll horizontally without shrinking its labels beyond readability. An expired attempt retains an explicit Expired label and unlocks the next level at zero points. Locked levels explain which preceding level must be finished. The first level is available only to approved participants and within its publication schedule.
 
 Before starting a timed challenge, participants see its instructions, number of pieces or maze description, time limit and points. A deliberate Start button begins the attempt; merely opening the instructions does not start the clock.
 
@@ -22,7 +22,7 @@ The proposed first jigsaw, at level 2, uses the supplied logo without altering i
 
 Participants drag pieces into board cells on a computer. On touch devices, they can select a piece and tap its destination. The same selection interaction is available through keyboard controls. Placed pieces can be moved or exchanged; pieces do not reveal whether a partial placement is correct. The completed board is checked by the server.
 
-The remaining time stays visible. Closing the dialog, changing tabs or refreshing the page does not pause or reset the attempt. Reopening resumes the saved board with the original deadline. Completion within the deadline awards points once and unlocks the next level. Expiry ends the attempt, awards no completion points and leaves subsequent levels locked. The proposed rule is one attempt per timed level; there is no participant-controlled restart.
+The remaining time stays visible. Closing the dialog, changing tabs or refreshing the page does not pause or reset the attempt. Reopening an active challenge resumes the saved board with the original deadline. Completion within the deadline awards points once and unlocks the next level. Expiry ends the attempt, awards zero points and unlocks the next level. Completed and expired challenges have disabled buttons and cannot be reopened through their cards. There is one attempt per timed level and no participant-controlled restart.
 
 The second jigsaw, at level 3, uses the supplied robot image and follows the same rules with independently configured difficulty and duration. Its board preserves the landscape image's aspect ratio rather than cropping it to a square. Grid rows and columns can differ. Both source images are supplied and must be used without redrawing their artwork.
 

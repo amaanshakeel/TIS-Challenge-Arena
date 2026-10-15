@@ -5,7 +5,7 @@ import {mkdir} from 'node:fs/promises';
 import {competitionHarness} from './helpers/competition-harness.mjs';
 import {inspectMaze} from '../js/arena-model.js';
 
-const h=await competitionHarness({visual:true});let browser;let checks=0;
+const h=await competitionHarness({visual:true,attemptLimit:true,timedProgression:true});let browser;let checks=0;
 const checked=label=>{console.log('PASS '+label);checks++;};
 try{
   const uid=randomUUID();await h.owner(async()=>{
@@ -54,12 +54,14 @@ try{
   await page.getByRole('button',{name:'Restore saved state',exact:true}).click();await page.locator('.jigsaw-board [data-slot="2"][data-piece="2"]:not([disabled])').waitFor();checked('a lost move response restores the accepted server placement');
   await page.locator('.jigsaw-tray [data-piece="3"]').dragTo(page.locator('.jigsaw-board [data-slot="3"]'));await page.locator('.jigsaw-board [data-slot="3"][data-piece="3"]:not([disabled])').waitFor();checked('desktop drag and drop persists a placement');
   for(let piece=4;piece<16;piece++)await place(piece);await page.locator('.game-clock').filter({hasText:'Completed'}).waitFor();await page.locator('#game-dialog').getByRole('button',{name:'Close',exact:true}).click();
+  await page.locator('#arena-progress li').nth(1).filter({hasText:'Completed'}).waitFor();assert.ok(await page.locator('.arena-level-card').filter({hasText:'Society logo jigsaw'}).getByRole('button').isDisabled());checked('completed logo challenge cannot be opened again');
   await page.setViewportSize({width:375,height:950});
   await page.getByRole('button',{name:'Start level 3',exact:true}).click();await page.getByRole('button',{name:'Start timed attempt',exact:true}).click();await page.locator('.jigsaw-tray button:not([disabled])').first().waitFor();
   const ratio=await page.locator('.jigsaw-board').evaluate(node=>node.clientWidth/node.clientHeight);assert.ok(Math.abs(ratio-1.5)<.03);checked('second jigsaw preserves the supplied landscape image');
   assert.ok(await page.locator('.jigsaw-reference img').evaluate(async img=>{await img.decode();return img.naturalWidth>img.naturalHeight&&img.src.endsWith('robot-workspace.png');}));checked('robot jigsaw displays its complete landscape reference picture');
   await page.locator('.jigsaw-tray [data-piece="0"]').tap();await page.locator('.jigsaw-board [data-slot="0"]').tap();await page.locator('.jigsaw-board [data-slot="0"][data-piece="0"]:not([disabled])').waitFor();assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));checked('touch selection places pieces on a mobile board without page overflow');
   for(let piece=1;piece<24;piece++)await place(piece);await page.locator('.game-clock').filter({hasText:'Completed'}).waitFor();await page.locator('#game-dialog').getByRole('button',{name:'Close',exact:true}).click();
+  await page.locator('#arena-progress li').nth(2).filter({hasText:'Completed'}).waitFor();assert.ok(await page.locator('.arena-level-card').filter({hasText:'Robot workspace jigsaw'}).getByRole('button').isDisabled());checked('completed robot challenge cannot be opened again');
   await page.getByRole('button',{name:'Start level 4',exact:true}).click();await page.getByRole('button',{name:'Start timed attempt',exact:true}).click();await page.locator('.maze-canvas').waitFor();
   const maze=inspectMaze(config.levels[3].settings.grid),path=maze.alternativePath;assert.ok(path.length>maze.shortestPath.length);
   await page.locator('.maze-canvas').focus();await page.keyboard.press('ArrowLeft');assert.ok((await page.locator('.maze-position').textContent()).includes('wall'));checked('maze walls block invalid movement');
@@ -77,6 +79,15 @@ try{
   await h.rpc('submit_answer',{p_puzzle_id:qs[0],p_answer:'42'},expiryUid);await h.rpc('arena_start',{p_level:2},expiryUid);
   const expiryContext=await browser.newContext();await h.fixture(expiryContext);await expiryContext.addInitScript(id=>sessionStorage.setItem('test-user',id),expiryUid);const expiryPage=await expiryContext.newPage();await expiryPage.goto(h.base+'student.html');await expiryPage.getByRole('button',{name:'Start level 2',exact:true}).click();
   await h.owner(()=>h.db.query("update private.arena_attempts set expires_at=clock_timestamp()+interval '2 seconds' where student_id=$1 and level=2",[expiryUid]));
-  await expiryPage.getByRole('button',{name:'Start timed attempt',exact:true}).click();await expiryPage.locator('.game-clock').filter({hasText:'Time expired'}).waitFor();assert.equal(await expiryPage.locator('.jigsaw-board button:not([disabled])').count(),0);await expiryPage.locator('#game-dialog').getByRole('button',{name:'Close',exact:true}).click();await expiryPage.locator('#arena-progress .level-expired').waitFor();assert.equal((await h.rpc('arena_start',{p_level:2},expiryUid)).status,'expired');checked('countdown expiry disables play and cannot restart or unlock later levels');
+  await expiryPage.getByRole('button',{name:'Start timed attempt',exact:true}).click();await expiryPage.locator('.game-clock').filter({hasText:'Time expired'}).waitFor();assert.equal(await expiryPage.locator('.jigsaw-board button:not([disabled])').count(),0);await expiryPage.locator('#game-dialog').getByRole('button',{name:'Close',exact:true}).click();await expiryPage.locator('#arena-progress .level-expired').waitFor();assert.equal((await h.rpc('arena_start',{p_level:2},expiryUid)).status,'expired');await expiryPage.getByRole('button',{name:'Start level 3',exact:true}).waitFor();checked('countdown expiry ends play without restarting and unlocks the next level');
+  for(const level of[3,4]){
+    await expiryPage.getByRole('button',{name:`Start level ${level}`,exact:true}).click();await expiryPage.getByRole('button',{name:'Start timed attempt',exact:true}).click();await expiryPage.getByRole('button',{name:'Restore saved state',exact:true}).waitFor();
+    await h.owner(()=>h.db.query("update private.arena_attempts set expires_at=clock_timestamp()-interval '1 second' where student_id=$1 and level=$2",[expiryUid,level]));
+    await expiryPage.getByRole('button',{name:'Restore saved state',exact:true}).click();await expiryPage.locator('.game-clock').filter({hasText:'Time expired'}).waitFor();await expiryPage.locator('#game-dialog').getByRole('button',{name:'Close',exact:true}).click();
+    assert.ok(await expiryPage.getByRole('button',{name:`Expired level ${level}`,exact:true}).isDisabled());
+  }
+  await expiryPage.getByRole('button',{name:'Open Final logic',exact:true}).click();
+  for(const [answer,text]of[['wrong','1 attempt remaining'],['wrong again','0 points']]){await expiryPage.locator('#answer').fill(answer);await expiryPage.getByRole('button',{name:'Submit answer',exact:true}).click();await expiryPage.locator('#solve-feedback').filter({hasText:text}).waitFor();}
+  await expiryPage.getByRole('button',{name:'Close',exact:true}).click();await expiryPage.locator('[data-arena-feedback]').filter({hasText:'finished all five levels'}).waitFor();assert.equal((await h.rpc('student_overview',{},expiryUid)).points,20);checked('robot and maze timeouts unlock final questions at zero points and the course can finish');
   assert.deepEqual(errors,[]);checked('integrated course has no browser JavaScript errors');console.log(`${checks} arena browser checks passed.`);
 }finally{await browser?.close();await h.close();}

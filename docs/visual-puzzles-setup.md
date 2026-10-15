@@ -8,7 +8,7 @@ The course runs inside the existing student and admin dashboards:
 4. Timed maze
 5. Final questions
 
-The top progress strip shows the current level in yellow, completed levels in green and locked levels in red. Labels accompany the colors. Completing a level unlocks the next; the database enforces this order.
+The top progress strip shows the current level in yellow, completed levels in green and locked levels in red. Expired timed levels remain labeled Expired and unlock the next level at zero points. Labels accompany the colors; the database enforces the sequence.
 
 ## Database update
 
@@ -17,6 +17,8 @@ Your existing schema.sql, part2.sql and part3.sql must already be installed. In 
 This script preserves existing accounts, standalone questions, submissions and leaderboard scores. It adds private course settings and timed attempts, plus authorized RPC endpoints. It does not open or populate question phases automatically.
 
 Then run **supabase/question-attempt-limit.sql** in a separate new query. This adds the two-attempt rule described in [question-attempts-setup.md](question-attempts-setup.md). If the visual extension is already installed, run only this new update.
+
+Finally run **supabase/timed-level-progression.sql** to enable zero-point advancement after timed expiry. If both previous updates are already installed, run only this final fix. See [timed-progression-fix.md](timed-progression-fix.md).
 
 ## Publish the application files
 
@@ -49,7 +51,7 @@ Each jigsaw shows its complete reference picture beside the board and shuffled p
 
 For the maze, use arrow keys while focused on the maze or its direction controls, or tap the on-screen buttons. Move through open corridors from the top entrance to the bottom exit. Any legal route completed before the deadline succeeds; a shorter route helps save time.
 
-Opening challenge instructions does not start the timer. **Start timed attempt** starts or resumes the student's single attempt. The remaining time and moves are saved by Supabase. Closing the dialog, switching tabs, reloading or changing the device clock does not reset the deadline. An expired timed level awards no completion points and leaves later levels locked; there is no participant restart.
+Opening challenge instructions does not start the timer. **Start timed attempt** starts or resumes the student's single attempt. The remaining time and moves are saved by Supabase. Closing the dialog, switching tabs, reloading or changing the device clock does not reset the deadline. An expired timed level earns zero points and unlocks the next level; there is no participant restart. Completed and expired challenge buttons are disabled.
 
 If a move fails or its response is lost, use **Restore saved state**. The server's state and revision decide which move was accepted. Never assume that an error means the server did not receive the move.
 

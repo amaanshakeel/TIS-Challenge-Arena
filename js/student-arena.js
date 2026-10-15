@@ -24,8 +24,11 @@ export function studentArena(root,service,{onQuestion,onChanged,onAccessDenied})
       if(!data.enabled){errorNotice(feedback,'The five-level competition is not open yet. The organizer will publish it when the question sets and challenges are ready.','info');return;}
       for(const level of data.levels){
         const card=element('article',undefined,`arena-level-card arena-${level.state}`);card.append(element('p',`LEVEL ${level.id} · ${labels[level.state]}`,'eyebrow'),element('h3',level.title));
-        if(level.state==='locked'){card.append(element('p',`Complete level ${level.id-1} to unlock this challenge.`,'small muted'));}
-        else if(level.state==='expired'){card.append(element('p','Your timed attempt has ended. Subsequent levels remain locked.','small muted'));}
+        if(level.state==='locked'){card.append(element('p',`Finish level ${level.id-1} to unlock this challenge.`,'small muted'));}
+        else if(level.state==='expired'){
+          card.append(element('p','Time expired · 0 points. This attempt is finished; continue to the next level.','small muted'));
+          const button=element('button','Time expired','button button-secondary button-small');button.type='button';button.disabled=true;button.setAttribute('aria-label',`Expired level ${level.id}`);card.append(button);
+        }
         else if(level.kind==='questions'){
           const limited=level.questions.some(question=>question.attempt_limit===2);
           card.append(element('p',limited?'Each question allows two attempts. The next level unlocks when all questions are solved or closed after two incorrect answers.':'Solve every question in this phase to unlock the next level.','small muted'));
@@ -40,11 +43,12 @@ export function studentArena(root,service,{onQuestion,onChanged,onAccessDenied})
           card.append(element('p',`${detail} · ${level.settings.seconds} seconds · ${level.points} points`,'small muted'));
           if(level.opens_at)card.append(element('p',`Opens ${formatDate(level.opens_at)}`,'small muted'));
           if(level.closes_at)card.append(element('p',`Closes ${formatDate(level.closes_at)}`,'small muted'));
-          const button=element('button',!level.available?'Currently unavailable':level.state==='completed'?'View completed challenge':'Start or resume challenge','button button-small');button.type='button';button.disabled=!level.available;button.setAttribute('aria-label',`${level.state==='completed'?'View':'Start'} level ${level.id}`);button.addEventListener('click',()=>game.open(level));card.append(button);
+          const completed=level.state==='completed';
+          const button=element('button',completed?'Completed':!level.available?'Currently unavailable':'Start or resume challenge',completed?'button button-secondary button-small':'button button-small');button.type='button';button.disabled=completed||!level.available;button.setAttribute('aria-label',`${completed?'Completed':'Start'} level ${level.id}`);if(!button.disabled)button.addEventListener('click',()=>game.open(level));card.append(button);
         }
         cards.append(card);
       }
-      if(data.levels.length&&data.levels.every(level=>level.state==='completed'))errorNotice(feedback,'You finished all five levels. Your earned points are on the leaderboard.','success');
+      if(data.levels.length&&data.levels.every(level=>['completed','expired'].includes(level.state)))errorNotice(feedback,'You finished all five levels. Your earned points are on the leaderboard.','success');
     }catch(error){if(request===generation){strip.replaceChildren();cards.replaceChildren();errorNotice(feedback,arenaError(error),['PGRST202','42883'].includes(error.code)?'info':'error');}onAccessDenied(error);}
     finally{if(request===generation)refresh.disabled=false;}
   }
